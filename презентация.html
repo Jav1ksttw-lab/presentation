@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Топ причин не идти в субботу на пары</title>
+<style>
+  :root{
+    --bg:#0f1020; --card:#191a33; --text:#f4f4ff; --muted:#a6a8d0;
+    --accent:#ffd23f; --accent2:#ff5e8a; --accent3:#4de1c1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+  .deck{position:relative;width:100vw;height:100vh}
+  .slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+    padding:6vh 8vw;opacity:0;transform:translateX(40px);pointer-events:none;
+    transition:opacity .45s ease,transform .45s ease;
+    background:radial-gradient(1200px 600px at 85% 10%,rgba(255,94,138,.18),transparent 60%),
+               radial-gradient(900px 500px at 5% 95%,rgba(77,225,193,.14),transparent 60%),var(--bg)}
+  .slide.active{opacity:1;transform:none;pointer-events:auto}
+  .slide.past{transform:translateX(-40px)}
+  .num{font-size:clamp(5rem,18vw,14rem);font-weight:900;line-height:.9;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;
+    position:absolute;right:6vw;top:6vh;opacity:.9}
+  h1{font-size:clamp(2.2rem,6vw,4.8rem);line-height:1.05;font-weight:900;max-width:14ch}
+  h1 span{color:var(--accent)}
+  h2{font-size:clamp(1.8rem,4.5vw,3.4rem);line-height:1.1;font-weight:800;max-width:18ch;margin-bottom:2.5vh}
+  p.lead{font-size:clamp(1.1rem,2.4vw,1.8rem);color:var(--muted);max-width:32ch;line-height:1.4}
+  .emoji{font-size:clamp(3rem,8vw,6rem);margin-bottom:2vh}
+  .tag{display:inline-block;margin-top:3vh;padding:.5em 1em;border-radius:999px;
+    background:rgba(255,210,63,.12);color:var(--accent);font-weight:700;font-size:clamp(.9rem,1.6vw,1.2rem);width:fit-content}
+  .quote{margin-top:3vh;padding:1.2em 1.4em;background:var(--card);border-left:6px solid var(--accent3);
+    border-radius:12px;max-width:34ch;font-size:clamp(1rem,2vw,1.4rem);color:var(--text)}
+  ul.final{list-style:none;margin-top:2vh}
+  ul.final li{font-size:clamp(1.1rem,2.4vw,1.8rem);padding:.45em 0;display:flex;gap:.6em;align-items:center}
+  ul.final li b{color:var(--accent3)}
+  .meter{margin-top:3vh;width:min(520px,80%)}
+  .bar{height:18px;border-radius:99px;background:var(--card);overflow:hidden;margin:.6em 0 .2em}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent3),var(--accent),var(--accent2));width:0;transition:width 1.2s ease .3s}
+  .slide.active .bar i{width:var(--w)}
+  .meter small{color:var(--muted);font-size:clamp(.85rem,1.4vw,1.1rem)}
+  .hud{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 24px;z-index:10;color:var(--muted);font-size:14px}
+  .progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--accent3),var(--accent),var(--accent2));width:0;transition:width .4s;z-index:11}
+  .hud button{background:var(--card);color:var(--text);border:0;border-radius:10px;padding:10px 16px;font-size:15px;cursor:pointer}
+  .hud button:hover{background:#25264a}
+  .hud .btns{display:flex;gap:8px}
+  @media (max-width:640px){.num{font-size:7rem;opacity:.35}.slide{padding:8vh 7vw 12vh}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+  <section class="slide">
+    <div class="emoji">🛌</div>
+    <h1>Топ причин <span>не идти</span> в субботу на пары</h1>
+    <p class="lead" style="margin-top:3vh">Научно необоснованное, но искренне выстраданное исследование</p>
+    <span class="tag">Листай стрелками → или свайпом</span>
+  </section>
+
+  <section class="slide">
+    <div class="num">10</div>
+    <div class="emoji">😴</div>
+    <h2>Неделя была тяжёлой</h2>
+    <p class="lead">Организм прошёл 5 учебных дней подряд. Это уже марафон, а не учёба.</p>
+    <div class="meter"><small>Остаток энергии в субботу утром</small><div class="bar"><i style="--w:7%"></i></div><small>7% (и это на режиме экономии)</small></div>
+  </section>
+
+  <section class="slide">
+    <div class="num">9</div>
+    <div class="emoji">🌙</div>
+    <h2>Пятничный вечер ещё не закончился</h2>
+    <p class="lead">Режим дня сбит, будильник воспринимается как личное оскорбление.</p>
+    <div class="quote">«Лягу пораньше» — последние слова пятницы в 23:00.</div>
+  </section>
+
+  <section class="slide">
+    <div class="num">8</div>
+    <div class="emoji">🚌</div>
+    <h2>Транспорт в выходной — лотерея</h2>
+    <p class="lead">Автобус придёт «через 40 минут», а может, вообще не придёт.</p>
+    <span class="tag">Опоздание гарантировано математически</span>
+  </section>
+
+  <section class="slide">
+    <div class="num">7</div>
+    <div class="emoji">🏢</div>
+    <h2>В здании пусто и жутковато</h2>
+    <p class="lead">Гардероб закрыт, столовая не работает, вахтёр смотрит на тебя как на привидение.</p>
+    <div class="quote">Ты не студент. Ты городская легенда.</div>
+  </section>
+
+  <section class="slide">
+    <div class="num">6</div>
+    <div class="emoji">☕</div>
+    <h2>Нет еды — нет мотивации</h2>
+    <p class="lead">Буфет закрыт. Единственный источник кофе — автомат, который помнит ещё прошлый век.</p>
+    <div class="meter"><small>Уровень кофеина в крови</small><div class="bar"><i style="--w:4%"></i></div><small>Критически низкий</small></div>
+  </section>
+
+  <section class="slide">
+    <div class="num">5</div>
+    <div class="emoji">👥</div>
+    <h2>Придут 4 человека из группы</h2>
+    <p class="lead">И один из них — преподаватель. Прятаться негде, отметиться «за друга» тоже.</p>
+    <span class="tag">Анонимность: 0%</span>
+  </section>
+
+  <section class="slide">
+    <div class="num">4</div>
+    <div class="emoji">🧺</div>
+    <h2>Суббота — день быта</h2>
+    <p class="lead">Стирка, уборка, закупка продуктов. Взрослая жизнь не сдаёт себя сама.</p>
+    <div class="quote">Носки закончились в среду. Это уже вопрос безопасности.</div>
+  </section>
+
+  <section class="slide">
+    <div class="num">3</div>
+    <div class="emoji">🎮</div>
+    <h2>Игры, друзья, сериалы</h2>
+    <p class="lead">У всех свой дедлайн: рейд в 12:00, новый сезон вышел, друзья зовут гулять.</p>
+    <span class="tag">Приоритеты расставлены верно</span>
+  </section>
+
+  <section class="slide">
+    <div class="num">2</div>
+    <div class="emoji">🧠</div>
+    <h2>Мозг в выходной не работает</h2>
+    <p class="lead">Информация, полученная в субботу, всё равно не усваивается. Проверено наукой, которую я только что придумал.</p>
+    <div class="meter"><small>КПД усвоения материала</small><div class="bar"><i style="--w:12%"></i></div><small>12% и то благодаря кофеину из автомата</small></div>
+  </section>
+
+  <section class="slide">
+    <div class="num">1</div>
+    <div class="emoji">🛏️</div>
+    <h2>Потому что кровать тёплая</h2>
+    <p class="lead">Самый сильный аргумент в истории человечества. Возразить нечего.</p>
+    <div class="quote">Ещё пять минут. И ещё пять. И ещё…</div>
+  </section>
+
+  <section class="slide">
+    <div class="emoji">🎓</div>
+    <h2>Итоги</h2>
+    <ul class="final">
+      <li><b>✓</b> Отдых — это тоже продуктивность</li>
+      <li><b>✓</b> Здоровье дороже отметки в журнале</li>
+      <li><b>✓</b> Но на сессии всё равно придётся отвечать 😅</li>
+    </ul>
+    <span class="tag">Спасибо за внимание! Вопросы? Лучше спать.</span>
+  </section>
+
+</div>
+
+<div class="hud">
+  <span id="counter">1 / 1</span>
+  <div class="btns">
+    <button id="prev" aria-label="Назад">←</button>
+    <button id="next" aria-label="Вперёд">→</button>
+    <button id="fs" aria-label="Полный экран">⛶</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0;
+  var counter=document.getElementById('counter');
+  var progress=document.getElementById('progress');
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,k){
+      s.classList.toggle('active',k===i);
+      s.classList.toggle('past',k<i);
+    });
+    counter.textContent=(i+1)+' / '+slides.length;
+    progress.style.width=((i+1)/slides.length*100)+'%';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function next(){show(i+1)} function prev(){show(i-1)}
+  document.getElementById('next').onclick=next;
+  document.getElementById('prev').onclick=prev;
+  document.getElementById('fs').onclick=function(){
+    if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+    else{document.exitFullscreen()}
+  };
+  document.addEventListener('keydown',function(e){
+    if(['ArrowRight','PageDown',' ','Enter'].indexOf(e.key)>-1){e.preventDefault();next()}
+    else if(['ArrowLeft','PageUp','Backspace'].indexOf(e.key)>-1){e.preventDefault();prev()}
+    else if(e.key==='Home'){show(0)} else if(e.key==='End'){show(slides.length-1)}
+    else if(e.key==='f'||e.key==='F'){document.getElementById('fs').click()}
+  });
+  var x0=null;
+  document.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null)return; var dx=e.changedTouches[0].clientX-x0;
+    if(Math.abs(dx)>50){dx<0?next():prev()} x0=null;
+  });
+  var start=parseInt((location.hash||'').slice(1),10);
+  show(isNaN(start)?0:start-1);
+})();
+</script>
+</body>
+</html>
