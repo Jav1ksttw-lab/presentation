@@ -1,0 +1,671 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Суббота без пар</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Onest:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: деканатское расписание. Одна пара на экран, красный штамп, жёлтый маркер.
+   Слева огромный номер причины, справа довод и «шуточная метрика». */
+:root {
+  --bg: #EDF0F5;
+  --paper: #F8F9FB;
+  --ink: #14213D;
+  --muted: #5B6781;
+  --line: #C9D0DE;
+  --stamp: #C8243A;
+  --mark: #F5C518;
+  --on-mark: #14213D;
+  --display: 'Unbounded', 'Arial Black', system-ui, sans-serif;
+  --body: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1626; --paper: #172036; --ink: #E9EDF6; --muted: #9AA6C0;
+    --line: #2B3858; --stamp: #FF6A7D; --mark: #F5C518; --on-mark: #14213D;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1626; --paper: #172036; --ink: #E9EDF6; --muted: #9AA6C0;
+  --line: #2B3858; --stamp: #FF6A7D; --mark: #F5C518; --on-mark: #14213D;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px;
+}
+mark { background: var(--mark); color: var(--on-mark); padding: 0 .18em; border-radius: 2px; }
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--stamp); outline-offset: 2px; }
+
+.stage { flex: 1; min-height: 0; position: relative; }
+.slide { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; display: none; }
+.slide.on { display: block; }
+.wrap { min-height: 100%; display: flex; align-items: center; padding-block: 8px; }
+
+.rise { min-width: 0; }
+.slide.on .rise { animation: rise .55s cubic-bezier(.2,.7,.2,1) both; animation-delay: var(--d, 0s); }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+
+.eyebrow, .kicker, .lab {
+  font-family: var(--mono); font-size: .75rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* Титульный слайд */
+.hero { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(20px, 5vw, 64px); align-items: center; width: 100%; max-width: 1100px; margin: 0 auto; }
+h1 {
+  font-family: var(--display); font-weight: 800; font-size: clamp(1.9rem, 6.2vw, 4.2rem);
+  line-height: 1.04; letter-spacing: -.03em; margin: 14px 0 16px; text-wrap: balance;
+}
+.lead { font-size: clamp(1rem, 2.2vw, 1.2rem); color: var(--muted); max-width: 46ch; margin: 0 0 22px; }
+.count { display: inline-flex; flex-direction: column; gap: 4px; }
+.count b { font-family: var(--mono); font-weight: 500; font-size: clamp(1.2rem, 3.6vw, 1.8rem); font-variant-numeric: tabular-nums; }
+.hint { margin-top: 22px; font-size: .85rem; color: var(--muted); }
+
+.tt-wrap { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 16px 14px 28px; }
+.tt { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.tt .h { font-family: var(--mono); font-size: .7rem; letter-spacing: .08em; color: var(--muted); text-align: center; padding-bottom: 4px; }
+.tt .h.sat { color: var(--stamp); font-weight: 500; }
+.tt .c { height: 28px; background: var(--line); border-radius: 3px; }
+.tt .c.sat { background: repeating-linear-gradient(135deg, var(--mark) 0 5px, var(--paper) 5px 10px); border: 1px solid var(--ink); }
+.tt .c.sun { background: transparent; border: 1px dashed var(--line); }
+.stamp {
+  display: inline-block; font-family: var(--display); font-weight: 800; letter-spacing: .08em;
+  color: var(--stamp); border: 3px solid var(--stamp); border-radius: 4px;
+  padding: 4px 12px; background: var(--bg); transform: rotate(-7deg); text-transform: uppercase;
+}
+.tt-wrap .stamp { position: absolute; right: 8%; bottom: 22%; font-size: clamp(.95rem, 2.6vw, 1.45rem); }
+
+/* Слайды причин */
+.reason { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(16px, 4vw, 56px); align-items: center; width: 100%; max-width: 1080px; margin: 0 auto; }
+.big {
+  font-family: var(--display); font-weight: 800; font-size: clamp(5.5rem, 21vw, 12rem);
+  line-height: .9; letter-spacing: -.05em; color: var(--stamp); margin-top: 4px;
+}
+h2 { font-family: var(--display); font-weight: 500; font-size: clamp(1.35rem, 4vw, 2.3rem); line-height: 1.18; letter-spacing: -.02em; margin: 0 0 14px; text-wrap: balance; }
+.reason p { font-size: clamp(1rem, 2.1vw, 1.2rem); max-width: 56ch; margin: 0; }
+.metric { margin-top: 22px; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px 16px; max-width: 460px; }
+.metric .val { font-family: var(--display); font-weight: 500; font-size: 1.6rem; margin: 4px 0 10px; }
+.bar { height: 12px; background: var(--bg); border: 1px solid var(--ink); border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--mark); transition: width .9s cubic-bezier(.2,.7,.2,1); }
+
+/* Калькулятор */
+.calc { width: 100%; max-width: 1080px; margin: 0 auto; }
+.calc h2 { margin-bottom: 6px; }
+.calc .sub { color: var(--muted); margin: 0 0 18px; }
+.cgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(16px, 3vw, 36px); }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 16px; min-width: 0; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field:last-child { margin-bottom: 0; }
+.field label { font-family: var(--mono); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.field label output { color: var(--ink); }
+select { background: var(--bg); border: 1.5px solid var(--ink); border-radius: 6px; padding: 10px 12px; width: 100%; }
+input[type=range] { width: 100%; accent-color: var(--stamp); height: 28px; margin: 0; }
+.alarm { font-family: var(--mono); font-weight: 500; font-size: clamp(3rem, 11vw, 5rem); line-height: 1; color: var(--stamp); font-variant-numeric: tabular-nums; margin: 4px 0 10px; }
+.rows { display: grid; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; }
+.rows li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--line); padding-bottom: 6px; }
+.rows li b { font-variant-numeric: tabular-nums; text-align: right; }
+.verdict .stamp { font-size: 1.05rem; }
+.verdict p { margin: 10px 0 0; color: var(--muted); font-size: .92rem; }
+.excuse-row { margin-top: clamp(14px, 2.4vw, 22px); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: stretch; }
+.excuse { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; min-height: 3.6em; overflow-wrap: anywhere; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { cursor: pointer; font-weight: 600; padding: 10px 16px; border-radius: 6px; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg); min-height: 44px; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn:active { transform: translateY(1px); }
+.msg { font-size: .85rem; color: var(--muted); margin-top: 8px; min-height: 1.3em; }
+
+/* Бонусные слайды */
+.center { width: 100%; max-width: 620px; margin: 0 auto; }
+.tc { text-align: center; }
+.center h2 { margin-bottom: 14px; }
+select, input[type=text] { background: var(--bg); border: 1.5px solid var(--ink); border-radius: 6px; padding: 10px 12px; width: 100%; }
+.qq { font-family: var(--display); font-weight: 500; font-size: clamp(1.1rem, 3.2vw, 1.5rem); line-height: 1.25; margin: 8px 0 14px; letter-spacing: -.01em; }
+.opts { display: grid; gap: 8px; }
+.opt { text-align: left; background: transparent; border: 1.5px solid var(--ink); border-radius: 6px; padding: 12px 14px; cursor: pointer; min-height: 44px; }
+.opt:disabled { cursor: default; }
+.opt.chosen { background: var(--mark); color: var(--on-mark); border-color: var(--ink); }
+.opt:disabled:not(.chosen) { opacity: .45; }
+.react { min-height: 3em; margin-top: 12px; color: var(--muted); }
+.panel .btns { margin-top: 8px; }
+.result { text-align: center; padding: 6px 0; }
+.result .stamp { font-size: 1.3rem; margin: 8px 0 16px; }
+.result p { margin: 0 0 14px; }
+.clockwrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.clock { position: relative; width: min(58vw, 230px); aspect-ratio: 1; max-width: 100%; border-radius: 50%; border: 6px solid var(--ink); background: var(--paper); cursor: pointer; display: grid; place-items: center; padding: 0; margin-top: 16px; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.clock::before, .clock::after { content: ""; position: absolute; top: -20px; width: 44px; height: 44px; border-radius: 50%; background: var(--stamp); border: 5px solid var(--ink); }
+.clock::before { left: 2%; }
+.clock::after { right: 2%; }
+.clock span { font-family: var(--mono); font-weight: 500; font-size: clamp(2rem, 9vw, 3rem); font-variant-numeric: tabular-nums; }
+.clock.hit { animation: shake .18s; }
+.clock.dead { border-color: var(--muted); opacity: .6; }
+@keyframes shake { 25% { transform: translateX(-7px) rotate(-5deg); } 75% { transform: translateX(7px) rotate(5deg); } }
+.stats { display: flex; gap: 22px; font-family: var(--mono); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.meter { width: min(100%, 360px); height: 12px; background: var(--bg); border: 1px solid var(--ink); border-radius: 3px; overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: var(--mark); transition: width .12s; }
+.gmsg { min-height: 2.6em; margin: 0; text-align: center; color: var(--ink); }
+.cert { background: var(--paper); border: 4px double var(--ink); border-radius: 6px; padding: clamp(18px, 4vw, 34px); text-align: center; }
+.cert p { margin: 10px 0; }
+.ctitle { font-family: var(--display); font-weight: 800; font-size: clamp(1.2rem, 4.2vw, 2rem); letter-spacing: -.02em; margin: 8px 0 12px; }
+.cert .name { font-family: var(--display); font-weight: 800; font-size: clamp(1.4rem, 5vw, 2.4rem); color: var(--stamp); margin: 8px 0; overflow-wrap: anywhere; }
+.cert .stamp { font-size: 1rem; margin-top: 10px; }
+.certfield { margin: 16px auto 0; max-width: 360px; text-align: left; }
+#confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 20; }
+#confetti i { position: absolute; top: -16px; width: 9px; height: 14px; animation: fall 1.9s cubic-bezier(.3,.6,.4,1) forwards; }
+@keyframes fall { to { transform: translate(var(--dx), 108vh) rotate(var(--r)); } }
+.slide.on .tt-wrap .stamp { animation: slam .45s .7s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes slam { from { opacity: 0; transform: rotate(-7deg) scale(2.6); } }
+
+/* Навигация */
+.nav { display: flex; align-items: center; gap: 12px; padding-top: 10px; }
+.prog { flex: 1; height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.prog i { display: block; height: 100%; width: 0; background: var(--stamp); transition: width .35s; }
+.pos { font-family: var(--mono); font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 4.5em; text-align: right; }
+.nbtn { width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid var(--ink); background: transparent; cursor: pointer; font-size: 1.2rem; line-height: 1; }
+.nbtn:disabled { opacity: .3; cursor: default; }
+
+@media (max-width: 720px) {
+  .hero, .reason, .cgrid { grid-template-columns: minmax(0, 1fr); }
+  .excuse-row { grid-template-columns: minmax(0, 1fr); }
+  .big { font-size: clamp(5rem, 28vw, 8rem); }
+  .wrap { align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<main class="stage" id="stage">
+
+  <section class="slide" aria-label="Титульный слайд">
+    <div class="wrap">
+      <div class="hero">
+        <div class="rise">
+          <div class="eyebrow">Расписание · суббота · пары 1–4</div>
+          <h1>Топ-<mark>10</mark> причин не идти на пары в субботу</h1>
+          <p class="lead">Научно необоснованное исследование. Все цифры выдуманы, ощущения настоящие.</p>
+          <div class="count"><span class="eyebrow">До субботы</span><b id="cd">…</b></div>
+          <div class="hint">Листайте стрелками, свайпом или кнопками внизу. В конце ждут калькулятор, тест, игра и сертификат.</div>
+        </div>
+        <div class="rise" style="--d:.1s">
+          <div class="tt-wrap" aria-hidden="true">
+            <div class="tt" id="tt"></div>
+            <span class="stamp">Отменено</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- сюда JS вставляет 10 слайдов с причинами -->
+
+  <section class="slide" id="calcSlide" aria-label="Калькулятор субботы">
+    <div class="wrap">
+      <div class="calc">
+        <div class="rise">
+          <div class="eyebrow">Бонус · считаем без жалости</div>
+          <h2>Сколько стоит ваша <mark>суббота</mark></h2>
+          <p class="sub">Выберите первую пару и дорогу. Калькулятор покажет, во сколько вставать и что вы потеряете.</p>
+        </div>
+        <div class="cgrid rise" style="--d:.08s">
+          <div class="panel">
+            <div class="field">
+              <label for="start">Начало первой пары</label>
+              <select id="start">
+                <option value="510" selected>08:30</option>
+                <option value="610">10:10</option>
+                <option value="710">11:50</option>
+                <option value="820">13:40</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pairs">Пар в день <output id="pairsOut">3</output></label>
+              <input type="range" id="pairs" min="1" max="4" step="1" value="3">
+            </div>
+            <div class="field">
+              <label for="commute">Дорога в один конец <output id="commuteOut">40 мин</output></label>
+              <input type="range" id="commute" min="10" max="90" step="5" value="40">
+            </div>
+          </div>
+          <div class="panel">
+            <div class="eyebrow">Будильник прозвенит в</div>
+            <div class="alarm" id="alarm">06:55</div>
+            <ul class="rows">
+              <li><span>Недоспите до 10:30</span><b id="lost">—</b></li>
+              <li><span>Суббота уйдёт на учёбу</span><b id="spent">—</b></li>
+              <li><span>Это столько серий сериала</span><b id="eps">—</b></li>
+            </ul>
+            <div class="verdict"><span class="stamp" id="verdict">—</span><p id="vtext"></p></div>
+          </div>
+        </div>
+        <div class="excuse-row rise" style="--d:.16s">
+          <div class="excuse" id="excuse" aria-live="polite">…</div>
+          <div class="btns">
+            <button class="btn" id="gen" type="button">Новая отмазка</button>
+            <button class="btn ghost" id="copy" type="button">Скопировать</button>
+          </div>
+        </div>
+        <div class="msg" id="msg">Генератор для шуток. Староста всё равно всё знает.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="quizSlide" aria-label="Тест на прогульщика">
+    <div class="wrap">
+      <div class="center">
+        <div class="rise">
+          <div class="eyebrow">Бонус · тест</div>
+          <h2>Вы <mark>точно</mark> не пойдёте?</h2>
+        </div>
+        <div class="panel rise" style="--d:.08s" id="quiz"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="gameSlide" aria-label="Игра Убей будильник">
+    <div class="wrap">
+      <div class="center tc">
+        <div class="rise">
+          <div class="eyebrow">Бонус · игра</div>
+          <h2>Убей <mark>будильник</mark></h2>
+        </div>
+        <div class="clockwrap rise" style="--d:.08s">
+          <button class="clock" id="clock" type="button" aria-label="Ударить будильник"><span id="clockTxt">06:30</span></button>
+          <div class="stats"><span id="gHits">0 / 20</span><span id="gTime">10,0 с</span></div>
+          <div class="meter" aria-hidden="true"><i id="gFill"></i></div>
+          <p class="gmsg" id="gMsg" aria-live="polite"></p>
+          <button class="btn" id="gRetry" type="button" hidden>Ещё раз</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="certSlide" aria-label="Сертификат выспавшегося">
+    <div class="wrap">
+      <div class="center tc">
+        <div class="rise">
+          <div class="eyebrow">Бонус · на память</div>
+          <h2>Ваш <mark>сертификат</mark></h2>
+        </div>
+        <div class="cert rise" style="--d:.08s">
+          <div class="eyebrow">Комитет по дополнительному сну</div>
+          <div class="ctitle">Сертификат выспавшегося</div>
+          <p>Настоящим подтверждается, что</p>
+          <div class="name" id="certName">Студент</div>
+          <p>имеет полное право проспать субботу <b id="certDate"></b>. Будильник в этот день считается недействительным.</p>
+          <span class="stamp">Выспался</span>
+        </div>
+        <div class="field certfield rise" style="--d:.14s">
+          <label for="nameIn">Ваше имя</label>
+          <input id="nameIn" type="text" maxlength="30" value="Студент" autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="confetti" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Навигация по слайдам">
+  <button class="nbtn" id="prev" type="button" aria-label="Назад">←</button>
+  <div class="prog" aria-hidden="true"><i id="progFill"></i></div>
+  <span class="pos" id="pos">1 / 12</span>
+  <button class="nbtn" id="next" type="button" aria-label="Вперёд">→</button>
+</nav>
+
+<script>
+(function () {
+  var REASONS = [
+    { n: 10, t: 'За окном ещё <mark>темно</mark>', d: 'Конец октября: когда звонит будильник, рассвет даже не думал начинаться. Вставать в темноту ради пары слишком даже для отличника.', ml: 'Света за окном в 7 утра', mv: '0%', p: 3 },
+    { n: 9, t: 'Носки сами себя не <mark>постирают</mark>', d: 'Чистых носков осталось две штуки, и они из разных пар. Суббота — единственный день, когда стиральная машина в общежитии свободна.', ml: 'Чистых носков в шкафу', mv: '2 шт.', p: 8 },
+    { n: 8, t: 'Столовая в субботу <mark>закрыта</mark>', d: 'Остаются автомат с кофе, который иногда отдаёт сдачу, и сухарики на дне рюкзака. Лекцию на голодный желудок не усвоить.', ml: 'Усвоение лекции натощак', mv: '6%', p: 6 },
+    { n: 7, t: 'Транспорт в субботу ходит <mark>по настроению</mark>', d: 'Расписание на остановке есть, автобуса нет. Вы ждёте его, он ждёт, пока вы уйдёте, а первая пара уже началась.', ml: 'Ожидание автобуса', mv: '47 мин', p: 78 },
+    { n: 6, t: 'Преподаватель тоже <mark>человек</mark>', d: 'Он тоже хотел бы спать. В субботу в аудитории пять студентов и один грустный маркер, который почти не пишет.', ml: 'Явка в аудитории', mv: '5 из 25', p: 20 },
+    { n: 5, t: 'Весь город живёт <mark>без очередей</mark>', d: 'Магазины, парикмахерская, кино, парк. Субботним утром мир открыт и пуст, а вы сидите в аудитории и смотрите на часы.', ml: 'Свободных мест в кино утром', mv: 'до 80%', p: 80 },
+    { n: 4, t: 'Друзья не будут <mark>ждать</mark>', d: 'Вечером все собираются в семь. А вам ещё нужно пережить три пары, дорогу домой и вернуться в человеческий вид.', ml: 'Заряд к вечеру после пар', mv: '3%', p: 3 },
+    { n: 3, t: 'Ближайшая суббота — <mark>Хэллоуин</mark>', d: '31 октября. Костюм сам не сошьётся, тыква сама не вырежется, а вечеринка начнётся раньше, чем закончится вторая пара.', ml: 'Страшность расписания', mv: '100%', p: 100 },
+    { n: 2, t: 'Отдохнувший мозг запоминает <mark>лучше</mark>', d: 'Во сне мозг закрепляет то, что вы учили всю неделю. Пара на недосыпе даёт меньше, чем конспект, прочитанный после нормального сна.', ml: 'Польза сна для памяти', mv: 'высокая', p: 85 },
+    { n: 1, t: 'Единственный день <mark>без будильника</mark>', d: 'Один день из семи, когда вы просыпаетесь, потому что выспались, а не потому что звонит телефон. Это не лень, это право.', ml: 'Часов сна, которые вы заслужили', mv: '9 ч', p: 100 }
+  ];
+
+  var stage = document.getElementById('stage');
+  var calcSlide = document.getElementById('calcSlide');
+  REASONS.forEach(function (r) {
+    var s = document.createElement('section');
+    s.className = 'slide';
+    s.setAttribute('aria-label', 'Причина ' + r.n);
+    s.innerHTML =
+      '<div class="wrap"><div class="reason">' +
+        '<div class="rise"><div class="kicker">Причина №</div><div class="big">' + r.n + '</div></div>' +
+        '<div class="rise" style="--d:.08s"><h2>' + r.t + '</h2><p>' + r.d + '</p>' +
+          '<div class="metric"><div class="lab">' + r.ml + '</div><div class="val">' + r.mv + '</div>' +
+          '<div class="bar"><i data-w="' + r.p + '"></i></div></div></div>' +
+      '</div></div>';
+    stage.insertBefore(s, calcSlide);
+  });
+
+  /* Мини-расписание на титульном слайде */
+  var tt = document.getElementById('tt');
+  var days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+  var html = '';
+  days.forEach(function (d, i) { html += '<div class="h' + (i === 5 ? ' sat' : '') + '">' + d + '</div>'; });
+  for (var row = 0; row < 4; row++) {
+    for (var col = 0; col < 7; col++) {
+      html += '<div class="c' + (col === 5 ? ' sat' : col === 6 ? ' sun' : '') + '"></div>';
+    }
+  }
+  tt.innerHTML = html;
+
+  /* Обратный отсчёт до субботы */
+  var cd = document.getElementById('cd');
+  function tick() {
+    var now = new Date();
+    var until = (6 - now.getDay() + 7) % 7;
+    if (until === 0) { cd.textContent = 'Суббота уже здесь'; return; }
+    var target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + until, 0, 0, 0);
+    var s = Math.max(0, Math.floor((target - now) / 1000));
+    var dd = Math.floor(s / 86400), hh = Math.floor(s % 86400 / 3600), mm = Math.floor(s % 3600 / 60), ss = s % 60;
+    function z(x) { return (x < 10 ? '0' : '') + x; }
+    cd.textContent = dd + ' д ' + z(hh) + ' ч ' + z(mm) + ' м ' + z(ss) + ' с';
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  /* Калькулятор субботы */
+  function fmt(m) {
+    m = ((m % 1440) + 1440) % 1440;
+    return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  }
+  function pl(n, a, b, c) {
+    n = Math.abs(n) % 100;
+    var k = n % 10;
+    if (n > 10 && n < 20) return c;
+    if (k > 1 && k < 5) return b;
+    if (k === 1) return a;
+    return c;
+  }
+  function hrs(x) { return x.toFixed(1).replace('.', ',') + ' ч'; }
+  var elStart = document.getElementById('start');
+  var elPairs = document.getElementById('pairs');
+  var elCommute = document.getElementById('commute');
+  function calc() {
+    var s = +elStart.value, p = +elPairs.value, c = +elCommute.value;
+    document.getElementById('pairsOut').textContent = p;
+    document.getElementById('commuteOut').textContent = c + ' мин';
+    var alarm = s - c - 45;
+    var lost = Math.max(0, 630 - alarm) / 60;
+    var spent = p * 1.5 + 2 * c / 60;
+    var eps = Math.floor(spent * 60 / 45);
+    document.getElementById('alarm').textContent = fmt(alarm);
+    document.getElementById('lost').textContent = hrs(lost);
+    document.getElementById('spent').textContent = hrs(spent);
+    document.getElementById('eps').textContent = eps + ' ' + pl(eps, 'серия', 'серии', 'серий');
+    var v, t;
+    if (lost >= 3) { v = 'Прогул одобрен'; t = 'Вставать в такую рань в выходной незаконно. Решение принято единогласно.'; }
+    else if (lost >= 1.5) { v = 'Лучше дома'; t = 'Можно доехать, но сон был важнее. Остаться тоже можно.'; }
+    else if (lost > 0) { v = 'Спорно'; t = 'Потеря небольшая, но суббота всё равно станет короче.'; }
+    else { v = 'Можно сходить'; t = 'Будильник звенит после десяти тридцати. Это уже почти приличная суббота.'; }
+    document.getElementById('verdict').textContent = v;
+    document.getElementById('vtext').textContent = t;
+  }
+  [elStart, elPairs, elCommute].forEach(function (e) { e.addEventListener('input', calc); });
+  calc();
+
+  /* Генератор отмазок */
+  var A = ['Простите, я бы пришёл,', 'Очень хотел быть на паре,', 'Я уже выходил из дома,'];
+  var B = ['но будильник проявил принципиальность', 'но мой автобус уехал без меня', 'но кот лёг на ноутбук с конспектом', 'но стиральная машина вышла из-под контроля', 'но тыква для Хэллоуина требует моего присутствия'];
+  var C = ['и я решил не рисковать.', 'поэтому в понедельник приду с двойной энергией.', 'справку приложу мысленно.'];
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  var elEx = document.getElementById('excuse');
+  var elMsg = document.getElementById('msg');
+  function gen() { elEx.textContent = pick(A) + ' ' + pick(B) + ' ' + pick(C); }
+  document.getElementById('gen').addEventListener('click', function () { gen(); elMsg.textContent = 'Генератор для шуток. Староста всё равно всё знает.'; });
+  document.getElementById('copy').addEventListener('click', function () {
+    var text = elEx.textContent;
+    function fallback() {
+      try {
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        var r = document.createRange();
+        r.selectNodeContents(elEx);
+        sel.addRange(r);
+      } catch (e) {}
+      elMsg.textContent = 'Текст выделен, скопируйте его вручную.';
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () { elMsg.textContent = 'Скопировано.'; }, fallback);
+    } catch (e) { fallback(); }
+  });
+  gen();
+
+  /* Конфетти */
+  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function confetti() {
+    if (reduceMotion) return;
+    var box = document.getElementById('confetti');
+    var cols = ['var(--mark)', 'var(--stamp)', 'var(--ink)'];
+    for (var i = 0; i < 48; i++) {
+      var s = document.createElement('i');
+      s.style.left = (Math.random() * 100) + '%';
+      s.style.background = cols[i % 3];
+      s.style.animationDelay = (Math.random() * 0.4) + 's';
+      s.style.setProperty('--dx', (Math.random() * 160 - 80) + 'px');
+      s.style.setProperty('--r', (Math.random() * 720 - 360) + 'deg');
+      box.appendChild(s);
+    }
+    setTimeout(function () { box.innerHTML = ''; }, 2600);
+  }
+
+  /* Тест */
+  var Q = [
+    { q: 'Будильник звонит в 6:30 в субботу. Что делаете?', a: [
+      { t: 'Выключаю и сплю дальше', s: 2, r: 'Разумное решение. Мозг благодарит.' },
+      { t: 'Бодро встаю', s: 0, r: 'Бодро это когда вы уже собрались. А вы просто лежите и страдаете.' },
+      { t: 'Ставлю ещё пять будильников', s: 1, r: 'Шестой вы тоже выключите.' } ] },
+    { q: 'За окном тьма и дождь. Ваш план?', a: [
+      { t: 'Остаться под одеялом', s: 2, r: 'Погода и организм в этом вопросе единодушны.' },
+      { t: 'Взять зонт и идти', s: 0, r: 'Зонт нашёлся только у соседа, и сосед спит.' },
+      { t: 'Подождать, пока дождь закончится', s: 1, r: 'Он закончится в понедельник.' } ] },
+    { q: 'Староста пишет в чат: «Кто идёт?»', a: [
+      { t: 'Ставлю реакцию и молчу', s: 1, r: 'Классика. Староста всё поймёт.' },
+      { t: 'Пишу, что заболел', s: 2, r: 'Выздоровеете как раз к воскресенью.' },
+      { t: 'Пишу «иду»', s: 0, r: 'Через минуту вы отредактируете сообщение.' } ] },
+    { q: 'Что манит сильнее?', a: [
+      { t: 'Кровать', s: 2, r: 'Она тёплая и никуда не уйдёт.' },
+      { t: 'Лекция', s: 0, r: 'Кровать обиделась и будет сниться.' },
+      { t: 'Кофе в закрытой столовой', s: 1, r: 'Закрытой. Вы помните?' } ] },
+    { q: 'Пара начинается через час. Последний шанс.', a: [
+      { t: 'Спокойно досыпаю', s: 2, r: 'Чемпион.' },
+      { t: 'Собираюсь', s: 0, r: 'Вы нашли только один носок.' },
+      { t: 'Решу через пять минут', s: 1, r: 'Они уже прошли.' } ] }
+  ];
+  var quiz = document.getElementById('quiz');
+  var qi = 0, score = 0, answered = false;
+  function qRender() {
+    var q = Q[qi];
+    var opts = '';
+    q.a.forEach(function (o, k) { opts += '<button class="opt" type="button" data-k="' + k + '">' + o.t + '</button>'; });
+    quiz.innerHTML =
+      '<div class="eyebrow">Вопрос ' + (qi + 1) + ' из ' + Q.length + '</div>' +
+      '<h3 class="qq">' + q.q + '</h3><div class="opts">' + opts + '</div>' +
+      '<div class="react" id="react" aria-live="polite"></div>' +
+      '<div class="btns"><button class="btn" type="button" id="qnext" hidden>' + (qi === Q.length - 1 ? 'Узнать вердикт' : 'Дальше') + '</button></div>';
+    answered = false;
+  }
+  function qResult() {
+    var title = score >= 8 ? 'Профессиональный прогульщик' : score >= 5 ? 'Талантливый прогульщик' : 'Совестливый прогульщик';
+    var chance = (10 - score) * 2;
+    quiz.innerHTML =
+      '<div class="result"><div class="eyebrow">Ваш вердикт</div><div><span class="stamp">Не пойдёте</span></div>' +
+      '<p><b>' + title + '</b></p><p>Вероятность появиться на паре в субботу: <b>' + chance + '%</b>.</p>' +
+      '<button class="btn" type="button" id="qagain">Пройти ещё раз</button></div>';
+    confetti();
+  }
+  quiz.addEventListener('click', function (e) {
+    var opt = e.target.closest('.opt');
+    if (opt && !answered) {
+      answered = true;
+      var o = Q[qi].a[+opt.getAttribute('data-k')];
+      score += o.s;
+      Array.prototype.forEach.call(quiz.querySelectorAll('.opt'), function (b) { b.disabled = true; });
+      opt.classList.add('chosen');
+      document.getElementById('react').textContent = o.r;
+      document.getElementById('qnext').hidden = false;
+      return;
+    }
+    if (e.target.id === 'qnext') { qi++; if (qi < Q.length) qRender(); else qResult(); }
+    if (e.target.id === 'qagain') { qi = 0; score = 0; qRender(); }
+  });
+  function qStart() { qi = 0; score = 0; qRender(); }
+  qStart();
+
+  /* Игра «Убей будильник» */
+  var GOAL = 20, LIMIT = 10000;
+  var clock = document.getElementById('clock');
+  var clockTxt = document.getElementById('clockTxt');
+  var gHits = document.getElementById('gHits');
+  var gTime = document.getElementById('gTime');
+  var gFill = document.getElementById('gFill');
+  var gMsg = document.getElementById('gMsg');
+  var gRetry = document.getElementById('gRetry');
+  var hits = 0, t0 = 0, gTimer = null, over = false;
+  function gReset() {
+    if (gTimer) clearInterval(gTimer);
+    gTimer = null; hits = 0; over = false;
+    clock.classList.remove('dead');
+    clockTxt.textContent = '06:30';
+    gHits.textContent = '0 / ' + GOAL;
+    gTime.textContent = '10,0 с';
+    gFill.style.width = '0';
+    gMsg.textContent = 'Нажимайте на будильник. Нужно ' + GOAL + ' ударов за 10 секунд.';
+    gRetry.hidden = true;
+  }
+  function gEnd(win) {
+    over = true;
+    if (gTimer) clearInterval(gTimer);
+    gTimer = null;
+    if (win) {
+      clock.classList.add('dead');
+      clockTxt.textContent = 'Zzz';
+      gMsg.textContent = 'Будильник побеждён. Суббота ваша.';
+      confetti();
+    } else {
+      gMsg.textContent = 'Будильник выжил: у вас ' + hits + ' из ' + GOAL + '. Попробуйте ещё раз.';
+    }
+    gRetry.hidden = false;
+  }
+  clock.addEventListener('click', function () {
+    if (over) return;
+    if (!gTimer) {
+      t0 = performance.now();
+      gTimer = setInterval(function () {
+        var left = Math.max(0, LIMIT - (performance.now() - t0));
+        gTime.textContent = (left / 1000).toFixed(1).replace('.', ',') + ' с';
+        if (left <= 0) gEnd(false);
+      }, 100);
+      gMsg.textContent = 'Бейте!';
+    }
+    hits++;
+    gHits.textContent = hits + ' / ' + GOAL;
+    gFill.style.width = Math.min(100, hits / GOAL * 100) + '%';
+    clock.classList.remove('hit');
+    void clock.offsetWidth;
+    clock.classList.add('hit');
+    if (hits >= GOAL) gEnd(true);
+  });
+  gRetry.addEventListener('click', gReset);
+  gReset();
+
+  /* Сертификат */
+  var nameIn = document.getElementById('nameIn');
+  var certName = document.getElementById('certName');
+  function satDate() {
+    var n = new Date();
+    var u = (6 - n.getDay() + 7) % 7;
+    var d = new Date(n.getFullYear(), n.getMonth(), n.getDate() + u);
+    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  document.getElementById('certDate').textContent = satDate();
+  nameIn.addEventListener('input', function () { certName.textContent = nameIn.value.trim() || 'Студент'; });
+
+  function onSlideChange(id) {
+    if (id === 'gameSlide') gReset();
+    if (id === 'quizSlide') qStart();
+  }
+
+  /* Слайды и навигация */
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var cur = 0;
+  var prev = document.getElementById('prev');
+  var next = document.getElementById('next');
+  var pos = document.getElementById('pos');
+  var fill = document.getElementById('progFill');
+
+  function go(i) {
+    i = Math.max(0, Math.min(total - 1, i));
+    cur = i;
+    onSlideChange(slides[i].id);
+    slides.forEach(function (s, k) { s.classList.toggle('on', k === i); });
+    var bars = slides[i].querySelectorAll('.bar i');
+    Array.prototype.forEach.call(bars, function (b) { b.style.width = '0'; });
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        Array.prototype.forEach.call(bars, function (b) { b.style.width = b.getAttribute('data-w') + '%'; });
+      });
+    });
+    slides[i].scrollTop = 0;
+    pos.textContent = (i + 1) + ' / ' + total;
+    fill.style.width = ((i + 1) / total * 100) + '%';
+    prev.disabled = i === 0;
+    next.disabled = i === total - 1;
+    try { if (location.hash !== '#s' + (i + 1)) location.hash = 's' + (i + 1); } catch (e) {}
+  }
+  prev.addEventListener('click', function () { go(cur - 1); });
+  next.addEventListener('click', function () { go(cur + 1); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target && e.target.matches && e.target.matches('input, select, textarea')) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(total - 1); }
+  });
+
+  var sx = 0, sy = 0, tracking = false;
+  stage.addEventListener('touchstart', function (e) {
+    if (e.target.closest('input, select, button')) { tracking = false; return; }
+    tracking = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (!tracking) return;
+    tracking = false;
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? cur + 1 : cur - 1);
+  }, { passive: true });
+
+  function fromHash() {
+    var m = /^#s(\d+)$/.exec(location.hash || '');
+    return m ? parseInt(m[1], 10) - 1 : 0;
+  }
+  window.addEventListener('hashchange', function () {
+    var i = fromHash();
+    if (i >= 0 && i < total && i !== cur) go(i);
+  });
+  go(Math.min(Math.max(fromHash(), 0), total - 1));
+})();
+</script>
+
+</body></html>
